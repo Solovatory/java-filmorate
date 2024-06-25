@@ -52,7 +52,7 @@ public class UserController {
     }
 
     private int getNextId() {
-        log.trace("Получение идентификатора");
+        log.trace("Получение уникального идентификатора для пользователя");
         int currentMaxId = users.keySet()
                 .stream()
                 .mapToInt(id -> id)

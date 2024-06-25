@@ -55,7 +55,7 @@ public class FilmController {
     }
 
     private int getNextId() {
-        log.trace("Получение идентификатора");
+        log.trace("Получение уникального идентификатора для фильма");
         int currentMaxId = films.keySet()
                 .stream()
                 .mapToInt(id -> id)
