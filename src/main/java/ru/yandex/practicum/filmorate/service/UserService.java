@@ -26,8 +26,8 @@ public class UserService {
         User user = userStorage.getUser(userId);
         User friend = userStorage.getUser(friendId);
         if (user != null && friend != null) {
-            userStorage.getUser(userId).getFriends().add(friendId);
-            userStorage.getUser(friendId).getFriends().add(userId);
+            user.getFriends().add(friendId);
+            friend.getFriends().add(userId);
         } else {
             throw new NotFoundException(notFoundMessage);
         }
@@ -37,8 +37,8 @@ public class UserService {
         User user = userStorage.getUser(id);
         User friend = userStorage.getUser(friendId);
         if (user != null && friend != null) {
-            userStorage.getUser(id).getFriends().remove(friendId);
-            userStorage.getUser(friendId).getFriends().remove(id);
+            user.getFriends().remove(friendId);
+            friend.getFriends().remove(id);
         } else {
             throw new NotFoundException(notFoundMessage);
         }
@@ -47,7 +47,7 @@ public class UserService {
     public List<User> getFriends(long id) {
         User user = userStorage.getUser(id);
         if (user != null) {
-            return userStorage.getUser(id).getFriends().stream().map(userStorage::getUser).toList();
+            return user.getFriends().stream().map(userStorage::getUser).toList();
         } else {
             throw new NotFoundException(notFoundMessage);
         }
