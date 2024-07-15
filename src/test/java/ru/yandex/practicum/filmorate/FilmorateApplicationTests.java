@@ -3,18 +3,18 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
 @SpringBootTest
 class FilmorateApplicationTests {
-    UserController userController = new UserController();
-    FilmController filmController = new FilmController();
+    InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
+    InMemoryFilmStorage inMemoryFilmStorage = new InMemoryFilmStorage();
 
     @Test
     public void createNewUserWithWrongEmailShouldThrowException() {
@@ -36,11 +36,11 @@ class FilmorateApplicationTests {
                 .email("")
                 .birthday(LocalDate.of(1980, 11, 12))
                 .build();
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user1), "При отсутствии " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryUserStorage.addUser(user1), "При отсутствии " +
                 "@ в поле Email исключение не выбрасыватся");
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user2), "При пустом " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryUserStorage.addUser(user2), "При пустом " +
                 " поле Email исключение не выбрасыватся");
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user3), "Если поле " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryUserStorage.addUser(user3), "Если поле " +
                 "Email равно null исключение не выбрасывается");
     }
 
@@ -64,11 +64,11 @@ class FilmorateApplicationTests {
                 .email("KO@yandex.ru")
                 .birthday(LocalDate.of(1980, 11, 12))
                 .build();
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user1), "При пустом " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryUserStorage.addUser(user1), "При пустом " +
                 "Логине исключение не выбрасыватся");
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user2), "Если в логине " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryUserStorage.addUser(user2), "Если в логине " +
                 "есть пробелы исключение не выбрасыватся");
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user3), "При значении" +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryUserStorage.addUser(user3), "При значении" +
                 "Логина null исключение не выбрасыватся");
     }
 
@@ -80,7 +80,7 @@ class FilmorateApplicationTests {
                 .email("KO@yandex.ru")
                 .birthday(LocalDate.of(2034, 11, 12))
                 .build();
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user1), "Если дата " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryUserStorage.addUser(user1), "Если дата " +
                 "рождения в будущем исключение не выбрасыватся");
     }
 
@@ -98,9 +98,9 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(2003, 4, 15))
                 .duration(120)
                 .build();
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film1), "При пустом " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryFilmStorage.addFilm(film1), "При пустом " +
                 "имени исключение не выбрасывается");
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film2), "При имени " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryFilmStorage.addFilm(film2), "При имени " +
                 "равном null исключение не выбрасывается");
     }
 
@@ -117,7 +117,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(2003, 4, 15))
                 .duration(120)
                 .build();
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film1), "При длине " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryFilmStorage.addFilm(film1), "При длине " +
                 "описания больше 200 знаков исключение не выбрасывается");
     }
 
@@ -129,7 +129,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(1736, 4, 15))
                 .duration(120)
                 .build();
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film1), "При " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryFilmStorage.addFilm(film1), "При " +
                 "неправильной дате релиза исключение не выбрасывается");
     }
 
@@ -141,7 +141,7 @@ class FilmorateApplicationTests {
                 .releaseDate(LocalDate.of(2003, 4, 15))
                 .duration(-120)
                 .build();
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film1), "При " +
+        Assertions.assertThrows(ValidationException.class, () -> inMemoryFilmStorage.addFilm(film1), "При " +
                 "отрицательной продолжительности исключение не выбрасывается");
     }
 }
