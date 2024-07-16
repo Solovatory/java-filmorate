@@ -29,10 +29,13 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilm(Long id) {
+        log.trace("Начало поиска фильма по id = {}", id);
         Film film = films.get(id);
         if (film == null) {
+            log.warn("Фильм с id = {} не найден", id);
             throw new NotFoundException("Фильм не найден");
         } else {
+            log.trace("Фильм с id = {} найден", id);
             return film;
         }
     }

@@ -12,12 +12,12 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequest(ValidationException e) {
-        return new ErrorResponse("Ошибка валидации");
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(NotFoundException e) {
-        return new ErrorResponse("Not Found");
+        return new ErrorResponse(e.getMessage());
     }
 }

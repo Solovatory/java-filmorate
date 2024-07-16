@@ -17,6 +17,7 @@ import java.util.List;
 public class UserController {
     private UserService userService;
     private UserStorage userStorage;
+    private final String friendPath = "/{id}/friends/{friend-id}";
 
     @Autowired
     public UserController(UserService userService, UserStorage userStorage) {
@@ -40,13 +41,13 @@ public class UserController {
         return userStorage.updateUser(newUser);
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable long id, @PathVariable long friendId) {
+    @PutMapping(friendPath)
+    public void addFriend(@PathVariable long id, @PathVariable("friend-id") long friendId) {
         userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping("{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable long id, @PathVariable long friendId) {
+    @DeleteMapping(friendPath)
+    public void removeFriend(@PathVariable long id, @PathVariable("friend-id") long friendId) {
         userService.removeFriend(id, friendId);
     }
 
@@ -55,8 +56,8 @@ public class UserController {
         return userService.getFriends(id);
     }
 
-    @GetMapping("{id}/friends/common/{otherId}")
-    public List<User> findMutualFriends(@PathVariable long id, @PathVariable long otherId) {
+    @GetMapping("{id}/friends/common/{other-id}")
+    public List<User> findMutualFriends(@PathVariable long id, @PathVariable("other-id") long otherId) {
         return userService.getMutualFriends(id, otherId);
     }
 }

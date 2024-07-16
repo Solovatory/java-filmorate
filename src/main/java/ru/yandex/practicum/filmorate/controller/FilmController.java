@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
 
@@ -17,13 +16,12 @@ import java.util.Collection;
 public class FilmController {
     private FilmService filmService;
     private FilmStorage filmStorage;
-    private UserStorage userStorage;
+    private final String likePath = "/{id}/like/{user-id}";
 
     @Autowired
-    public FilmController(FilmService filmService, FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmController(FilmService filmService, FilmStorage filmStorage) {
         this.filmService = filmService;
         this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
     }
 
 
@@ -43,13 +41,13 @@ public class FilmController {
         return filmStorage.updateFilm(newFilm);
     }
 
-    @PutMapping("/{id}/like/{userId}")
-    public void like(@PathVariable Long id, @PathVariable Long userId) {
+    @PutMapping(likePath)
+    public void like(@PathVariable Long id, @PathVariable("user-id") Long userId) {
         filmService.addLike(id, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
-    public void unlike(@PathVariable Long id, @PathVariable Long userId) {
+    @DeleteMapping(likePath)
+    public void unlike(@PathVariable Long id, @PathVariable("user-id") Long userId) {
         filmService.removeLike(id, userId);
     }
 
