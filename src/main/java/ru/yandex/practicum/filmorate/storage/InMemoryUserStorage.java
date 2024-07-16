@@ -28,7 +28,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User getUser(Long id) {
         User user = users.get(id);
         if (user == null) {
-            throw new NotFoundException("Пользователь не найден");
+            throw new NotFoundException(String.format("Пользователь с id = %d не найден", id));
         } else {
             return user;
         }

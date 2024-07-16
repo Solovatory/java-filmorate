@@ -33,7 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = films.get(id);
         if (film == null) {
             log.warn("Фильм с id = {} не найден", id);
-            throw new NotFoundException("Фильм не найден");
+            throw new NotFoundException(String.format("Фильм c id = %d не найден", id));
         } else {
             log.trace("Фильм с id = {} найден", id);
             return film;

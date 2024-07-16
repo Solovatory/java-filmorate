@@ -18,6 +18,7 @@ public class UserController {
     private UserService userService;
     private UserStorage userStorage;
     private final String friendPath = "/{id}/friends/{friend-id}";
+    private final String friendIdPath = "friend-id";
 
     @Autowired
     public UserController(UserService userService, UserStorage userStorage) {
@@ -42,12 +43,12 @@ public class UserController {
     }
 
     @PutMapping(friendPath)
-    public void addFriend(@PathVariable long id, @PathVariable("friend-id") long friendId) {
+    public void addFriend(@PathVariable long id, @PathVariable(friendIdPath) long friendId) {
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping(friendPath)
-    public void removeFriend(@PathVariable long id, @PathVariable("friend-id") long friendId) {
+    public void removeFriend(@PathVariable long id, @PathVariable(friendIdPath) long friendId) {
         userService.removeFriend(id, friendId);
     }
 
