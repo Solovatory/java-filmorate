@@ -1,147 +1,121 @@
 package ru.yandex.practicum.filmorate;
 
-import org.junit.jupiter.api.Assertions;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.FilmController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.UserController;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-@SpringBootTest
-class FilmorateApplicationTests {
-    UserController userController = new UserController();
-    FilmController filmController = new FilmController();
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-    @Test
-    public void createNewUserWithWrongEmailShouldThrowException() {
-        User user1 = User.builder()
-                .name("Kate Olsen")
-                .login("KO")
-                .email("KOyandex.ru")
-                .birthday(LocalDate.of(1980, 11, 12))
-                .build();
-        User user2 = User.builder()
-                .name("Kate Olsen")
-                .login("KO")
-                .email("")
-                .birthday(LocalDate.of(1980, 11, 12))
-                .build();
-        User user3 = User.builder()
-                .name("Kate Olsen")
-                .login(null)
-                .email("")
-                .birthday(LocalDate.of(1980, 11, 12))
-                .build();
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user1), "При отсутствии " +
-                "@ в поле Email исключение не выбрасыватся");
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user2), "При пустом " +
-                " поле Email исключение не выбрасыватся");
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user3), "Если поле " +
-                "Email равно null исключение не выбрасывается");
+@WebMvcTest(UserController.class)
+public class FilmorateApplicationTests {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private UserStorage userStorage;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private User user;
+
+    @BeforeEach
+    public void setUp() {
+        user = new User();
+        user.setName("Vlados");
+        user.setEmail("vlados@gmail.com");
+        user.setId(1);
+        user.setBirthday(LocalDate.of(1990, 5, 12));
+        user.setLogin("DaosChaos");
     }
 
     @Test
-    public void createNewUserWithWrongLoginShouldThrowException() {
-        User user1 = User.builder()
-                .name("Kate Olsen")
-                .login("")
-                .email("KO@yandex.ru")
-                .birthday(LocalDate.of(1980, 11, 12))
-                .build();
-        User user2 = User.builder()
-                .name("Kate Olsen")
-                .login("Kate Olsen")
-                .email("KO@yandex.ru")
-                .birthday(LocalDate.of(1980, 11, 12))
-                .build();
-        User user3 = User.builder()
-                .name("Kate Olsen")
-                .login(null)
-                .email("KO@yandex.ru")
-                .birthday(LocalDate.of(1980, 11, 12))
-                .build();
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user1), "При пустом " +
-                "Логине исключение не выбрасыватся");
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user2), "Если в логине " +
-                "есть пробелы исключение не выбрасыватся");
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user3), "При значении" +
-                "Логина null исключение не выбрасыватся");
+    public void testFindAll() throws Exception {
+        List<User> allUsers = Collections.singletonList(user);
+        given(userStorage.getUsers()).willReturn(allUsers);
+
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value(user.getName()));
     }
 
     @Test
-    public void createNewUserWithWrongBirthdayShouldThrowException() {
-        User user1 = User.builder()
-                .name("Kate Olsen")
-                .login("KO")
-                .email("KO@yandex.ru")
-                .birthday(LocalDate.of(2034, 11, 12))
-                .build();
-        Assertions.assertThrows(ValidationException.class, () -> userController.create(user1), "Если дата " +
-                "рождения в будущем исключение не выбрасыватся");
+    public void testCreate() throws Exception {
+        given(userService.create(user)).willReturn(user);
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(user.getName()));
     }
 
     @Test
-    public void createNewFilmWithWrongNameShouldThrowException() {
-        Film film1 = Film.builder()
-                .name("")
-                .description("Good choice")
-                .releaseDate(LocalDate.of(2003, 4, 15))
-                .duration(120)
-                .build();
-        Film film2 = Film.builder()
-                .name(null)
-                .description("Good choice")
-                .releaseDate(LocalDate.of(2003, 4, 15))
-                .duration(120)
-                .build();
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film1), "При пустом " +
-                "имени исключение не выбрасывается");
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film2), "При имени " +
-                "равном null исключение не выбрасывается");
+    public void testUpdate() throws Exception {
+        given(userStorage.updateUser(user)).willReturn(user);
+
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(user.getName()));
     }
 
     @Test
-    public void createNewFilmWithWrongDescriptionShouldThrowException() {
-        Film film1 = Film.builder()
-                .name("")
-                .description("«Тачки» — серия компьютерно-анимационных фильмов и медиафраншиза Disney, события " +
-                        "которой разворачиваются в мире, населённом антропоморфными автомобилями. Начало франшизы " +
-                        "было положено с выпуска одноимённого мультфильма в 2006 году, снятого компанией Pixar и " +
-                        "выпущенного Walt Disney Pictures. В 2011 году последовало продолжение. Третий мультфильм, " +
-                        "«Тачки 3», вышел в 2017 году. Студией Disneytoon было выпущено два спин-оффа — «Самолёты» " +
-                        "(2013) и «Самолёты: Огонь и вода» (2014).")
-                .releaseDate(LocalDate.of(2003, 4, 15))
-                .duration(120)
-                .build();
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film1), "При длине " +
-                "описания больше 200 знаков исключение не выбрасывается");
+    public void testAddFriend() throws Exception {
+        doNothing().when(userService).addFriend(1L, 2L);
+
+        mockMvc.perform(put("/users/1/friends/2"))
+                .andExpect(status().isOk());
     }
 
     @Test
-    public void createNewFilmWithWrongReleaseDateShouldThrowException() {
-        Film film1 = Film.builder()
-                .name("Cars")
-                .description("Good choice")
-                .releaseDate(LocalDate.of(1736, 4, 15))
-                .duration(120)
-                .build();
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film1), "При " +
-                "неправильной дате релиза исключение не выбрасывается");
+    public void testRemoveFriend() throws Exception {
+        doNothing().when(userService).removeFriend(1L, 2L);
+
+        mockMvc.perform(delete("/users/1/friends/2"))
+                .andExpect(status().isOk());
     }
 
     @Test
-    public void createNewFilmWithWrongDurationShouldThrowException() {
-        Film film1 = Film.builder()
-                .name("Cars")
-                .description("Good choice")
-                .releaseDate(LocalDate.of(2003, 4, 15))
-                .duration(-120)
-                .build();
-        Assertions.assertThrows(ValidationException.class, () -> filmController.create(film1), "При " +
-                "отрицательной продолжительности исключение не выбрасывается");
+    public void testFindFriends() throws Exception {
+        List<User> friends = Arrays.asList(user);
+        given(userService.getFriends(1L)).willReturn(friends);
+
+        mockMvc.perform(get("/users/1/friends"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value(user.getName()));
+    }
+
+    @Test
+    public void testFindMutualFriends() throws Exception {
+        List<User> mutualFriends = Arrays.asList(user);
+        given(userService.getMutualFriends(1L, 2L)).willReturn(mutualFriends);
+
+        mockMvc.perform(get("/users/1/friends/common/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value(user.getName()));
     }
 }
