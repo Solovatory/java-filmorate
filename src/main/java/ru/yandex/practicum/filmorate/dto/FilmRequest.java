@@ -1,21 +1,17 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
 import java.util.Set;
 
 @Data
-@EqualsAndHashCode(of = {"id"})
-@Table(name = "films")
-public class Film {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class FilmRequest {
     private Long id;
     @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
@@ -26,7 +22,5 @@ public class Film {
     private int duration;
     private Integer likes;
     private Set<Genre> genres;
-    @ManyToOne
-    @JoinColumn(name = "mpa_id")
     private Mpa mpa;
 }
