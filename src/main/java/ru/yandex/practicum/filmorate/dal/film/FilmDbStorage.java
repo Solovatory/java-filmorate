@@ -84,8 +84,8 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                     log.warn("Жанр с id {} не найден в базе", genre.getId());
                     throw new ValidationException(String.format("Жанра с id = %d не существует", genre.getId()));
                 }
-                Genre GenreToAdd = newGenre.orElse(null);
-                genre.setName(GenreToAdd.getName());
+                Genre genreToAdd = newGenre.orElse(null);
+                genre.setName(genreToAdd.getName());
             }
             addFilmGenre(film.getId(), film.getGenres());
             film.setGenres(genres);
